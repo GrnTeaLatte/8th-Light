@@ -4,9 +4,10 @@ import urllib.parse
 
 # API calls to google books
 def get_google_books(query):
-    # Limit 5 results
+    # Limit 5 results, search only books
     parameters = {
-        "maxResults" : 5
+        "maxResults" : 5,
+        "printType" : "books"
     }
     try:
         response = requests.get(
@@ -46,56 +47,61 @@ def select_option(results):
 def write_reading_list(results):
     option = input("Type Number to bookmark to Reading List or 'back' to go back to options: ")
     while option != "back":
-        if option.isdigit():
+        if option.isdigit():    # allowing only number submissions
             book_number = int(option)
 
-            if book_number in range(1,6):
+            if book_number in range(1,6):   # only numbers 1-5
                 book = results['items'][book_number-1]
 
-                with open("sample.json", "r+") as file:
+                with open("sample.json", "r+") as file: # writing and appending to json file
                     file_data = json.load(file)
-                    if any(saved_book['id'] == book['id'] for saved_book in file_data["reading_list"]):
+                    if any(saved_book['id'] == book['id'] for saved_book in file_data["reading_list"]): # if book already exists on List, do not add
                         print(f"Book {book_number} is already on the Reading List")
                     else:
-                        file_data["reading_list"].append(book)
+                        file_data["reading_list"].append(book) # adding book to Reading List as list    
                         file.seek(0)
                         json.dump(file_data, file, indent = 4)
 
                         print(f"Book {book_number} saved to Reading List\n")
+            else:
+                print('Please enter a valid number between 1 and 5')
         else:
             print('Please enter a valid number between 1 and 5')
 
         option = input("Type Number to bookmark to Reading List or 'back' to go back to options: ")
 
-def access_reading_list():
+# Viewing the Reading List
+def access_reading_list():  
     with open('sample.json', 'r') as file:
         file_data = json.load(file)
-        if len(file_data['reading_list']) == 0:
+        if len(file_data['reading_list']) == 0:     # checking if reading list is empty
             print("Your Reading List is currently empty.")
         else:
             print_books(file_data['reading_list'])  
 
+# sanitize query in case user enters harmful characters
 def sanitize_query(query):
-    sanitized_query = urllib.parse.quote(query) 
+    sanitized_query = urllib.parse.quote(query.strip()) 
     return sanitized_query
 
+#handle empty inputs
 def is_valid_query(query):
-    return len(query.strip()) > 0 #handle empty inputs
+    return len(query) > 0 
 
+# Running the application
 def run_program():
-    user_input = input("Find Books by Title or type 'E' to Exit: ")
-    while user_input != 'E':
-        query = sanitize_query(user_input)
+    user_input = input("Find Books by Title or type 'E' to Exit: ") # User search google books
+    while user_input != 'E': 
+        query = sanitize_query(user_input)  # sanitizing query and making sure it's valid 
         if is_valid_query(query):
-            results = get_google_books(query)
-            if results['totalItems'] != 0:
+            results = get_google_books(query)   # getting json results through API call
+            if results['totalItems'] != 0:      # if the search returns valid results, display first 5 results 
                 print_books(results['items'])
-                select_option(results)
+                select_option(results)          # allow user to add to Reading List, perform another search, or view list
             else:
-                print('No results found, please try again.')
+                print('No results found, please try again.')    
         else:
             print('Please enter valid search term')
-        
         user_input = input("Find Books by Title or type 'E' to Exit: ")
 
 run_program()
