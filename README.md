@@ -7,10 +7,14 @@ This program is written in python.
 To get started, first download a recent installation of the Python interpreter(https://www.python.org/downloads/).
 
 Install requests (REST API framework)
+```
 $ pip install -U requests
+```
 
 Run the program from a terminal:
+```
 $ python3 app.py
+```
 
 Problem Description
 
