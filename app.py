@@ -1,7 +1,10 @@
 import requests 
 import json
- 
+import urllib.parse
+
+# API calls to google books
 def get_google_books(query):
+    # Limit 5 results
     parameters = {
         "maxResults" : 5
     }
@@ -16,27 +19,30 @@ def get_google_books(query):
 
     return response.json()
 
+# json parse results for title, author(s) and publisher, n/a to handle missing data
 def print_books(results):
     for index, item in enumerate(results):
         book_info = item['volumeInfo']
-        title = book_info.get('title', "n/a")
+        title = book_info.get('title', "n/a") 
         author = ', '.join(book_info.get('authors', "")) or 'n/a'
         publisher = book_info.get('publisher', "n/a")
          
-        print(index+1, f"{title}\n\tAuthor: {author}\n\tPublisher: {publisher}")
+        print(index+1, f"{title}\n\tAuthor: {author}\n\tPublisher: {publisher}") #print with index
         
+# options for user to use different aspects of application
 def select_option(results):
-    option = input("Type 'Bookmark' to save book(s) to Readling List, 'Access' to view Reading List or 'back' to go back to search: ")
-    while option != 'back':
-        if option =='Bookmark':
+    option = input("Type 'Bookmark' to save book(s) to Reading List, 'Access' to view Reading List or 'back' to go back to search: ")
+    while option != 'back':         # 'back' to do another search or exit 
+        if option =='Bookmark':     # 'Bookmark' to save to Reading List
             write_reading_list(results)
-        elif option == 'Access':
+        elif option == 'Access':    # 'Access' to view Reading List
             access_reading_list()
         else:
             print("Please enter valid option")
 
         option = input("Type 'Bookmark' to save book(s) to Readling List, 'Access' to view Reading List or 'back' to go back to search: ")
 
+# Writing to Reading List
 def write_reading_list(results):
     option = input("Type Number to bookmark to Reading List or 'back' to go back to options: ")
     while option != "back":
@@ -64,15 +70,24 @@ def write_reading_list(results):
 def access_reading_list():
     with open('sample.json', 'r') as file:
         file_data = json.load(file)
-    
-        print_books(file_data['reading_list'])  
+        if len(file_data['reading_list']) == 0:
+            print("Your Reading List is currently empty.")
+        else:
+            print_books(file_data['reading_list'])  
+
+def sanitize_query(query):
+    sanitized_query = urllib.parse.quote(query) 
+    return sanitized_query
+
+def is_valid_query(query):
+    return len(query.strip()) > 0 #handle empty inputs
 
 def run_program():
     user_input = input("Find Books by Title or type 'E' to Exit: ")
     while user_input != 'E':
-        if len(user_input.strip()) > 0:
-            results = get_google_books(user_input)
-            print(results)
+        query = sanitize_query(user_input)
+        if is_valid_query(query):
+            results = get_google_books(query)
             if results['totalItems'] != 0:
                 print_books(results['items'])
                 select_option(results)
