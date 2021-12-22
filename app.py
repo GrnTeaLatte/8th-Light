@@ -2,6 +2,13 @@ import requests
 import json
 import urllib.parse
 
+ACCESS_ACTION = 'access'
+BOOKMARK_ACTION = 'bookmark'
+BACK_ACTION = 'back'
+EXIT_ACTION = 'E'
+
+GOOGLE_QUERY_URL = 'https://www.googleapis.com/books/v1/volumes?q='
+
 # API calls to google books
 def get_google_books(query):
     # Limit 5 results, search only books
@@ -11,7 +18,7 @@ def get_google_books(query):
     }
     try:
         response = requests.get(
-            f"https://www.googleapis.com/books/v1/volumes?q={query}", params = parameters
+            f"{GOOGLE_QUERY_URL}{query}", params = parameters
         )
         response.raise_for_status()
     # error handling
@@ -32,21 +39,24 @@ def print_books(results):
         
 # options for user to use different aspects of application
 def select_option(results):
-    option = input("Type 'Bookmark' to save book(s) to Reading List, 'Access' to view Reading List or 'back' to go back to search: ")
-    while option != 'back':         # 'back' to do another search or exit 
-        if option =='Bookmark':     # 'Bookmark' to save to Reading List
+    option = input(f"Type '{BOOKMARK_ACTION}' to save book(s) to Reading List, '{ACCESS_ACTION}' to view Reading List or '{BACK_ACTION}' to go back to search: ")
+    option = option.lower()
+    while option != BACK_ACTION:         # 'back' to do another search or exit 
+        if option == BOOKMARK_ACTION:     # 'Bookmark' to save to Reading List
             write_reading_list(results)
-        elif option == 'Access':    # 'Access' to view Reading List
+        elif option == ACCESS_ACTION:    # 'Access' to view Reading List
             access_reading_list()
         else:
             print("Please enter valid option")
 
-        option = input("Type 'Bookmark' to save book(s) to Readling List, 'Access' to view Reading List or 'back' to go back to search: ")
+        option = input(f"Type '{BOOKMARK_ACTION}' to save book(s) to Reading List, '{ACCESS_ACTION}' to view Reading List or '{BACK_ACTION}' to go back to search: ")
+        option = option.lower()
 
 # Writing to Reading List
 def write_reading_list(results):
-    option = input("Type Number to bookmark to Reading List or 'back' to go back to options: ")
-    while option != "back":
+    option = input(f"Type the number to bookmark to Reading List or '{BACK_ACTION}' to go back to options: ")
+    option = option.lower()
+    while option != BACK_ACTION:
         if option.isdigit():    # allowing only number submissions
             book_number = int(option)
 
@@ -68,7 +78,8 @@ def write_reading_list(results):
         else:
             print('Please enter a valid number between 1 and 5')
 
-        option = input("Type Number to bookmark to Reading List or 'back' to go back to options: ")
+        option = input(f"Type the number to bookmark to Reading List or '{BACK_ACTION}' to go back to options: ")
+        option = option.lower()
 
 # Viewing the Reading List
 def access_reading_list():  
@@ -90,8 +101,8 @@ def is_valid_query(query):
 
 # Running the application
 def run_program():
-    user_input = input("Find Books by Title or type 'E' to Exit: ") # User search google books
-    while user_input != 'E': 
+    user_input = input(f"Find Books by Title or type '{EXIT_ACTION}' to Exit: ") # User search google books
+    while user_input != EXIT_ACTION: 
         query = sanitize_query(user_input)  # sanitizing query and making sure it's valid 
         if is_valid_query(query):
             results = get_google_books(query)   # getting json results through API call
@@ -102,6 +113,6 @@ def run_program():
                 print('No results found, please try again.')    
         else:
             print('Please enter valid search term')
-        user_input = input("Find Books by Title or type 'E' to Exit: ")
+        user_input = input(f"Find Books by Title or type '{EXIT_ACTION}' to Exit: ")
 
 run_program()
