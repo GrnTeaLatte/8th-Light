@@ -45,6 +45,7 @@ class TestGoogleInterface(unittest.TestCase):
         assert self.assertRaises(HTTPError)
 
 class TestLibrary(unittest.TestCase):
+    # capture print output 
     @contextmanager
     def capture_output(self):
         output, error = StringIO(), StringIO()
@@ -103,6 +104,7 @@ class TestReadingList(unittest.TestCase):
         }
     }
 
+    # capture print output
     @contextmanager
     def capture_output(self):
         output, error = StringIO(), StringIO()
@@ -113,6 +115,7 @@ class TestReadingList(unittest.TestCase):
         finally:
             sys.stdout, sys.stderr = old_output, old_error
 
+    # mock reading and writing of file to avoid writing to sample.json
     @contextmanager
     def mock_file_operations(self, file_mock, contents, write_mock):
         with patch('app.open', file_mock, create= True):
@@ -123,7 +126,6 @@ class TestReadingList(unittest.TestCase):
     def test_write(self):
         book_number = 1
 
-        # Mock read and write function to avoid writing test data to sample.json
         file_mock = mock_open()
         contents = Mock()
         contents.side_effect = [ {"reading_list": []} ]
@@ -139,7 +141,6 @@ class TestReadingList(unittest.TestCase):
         file_mock.assert_called_once_with('sample.json', 'r+')
 
     def test_access_empty_list(self):
-        # Mock read and write function to avoid writing test data to sample.json
         file_mock = mock_open()
         contents = Mock()
         contents.side_effect = [ {"reading_list": []} ]
@@ -155,7 +156,6 @@ class TestReadingList(unittest.TestCase):
         file_mock.assert_called_once_with('sample.json', 'r')
     
     def test_access_non_empty_list(self):
-        # Mock read and write function to avoid writing test data to sample.json
         file_mock = mock_open()
         contents = Mock()
         contents.side_effect = [ {
@@ -170,7 +170,6 @@ class TestReadingList(unittest.TestCase):
                 ReadingList.access()
             output = out.getvalue().strip()
             self.assertEqual(output, '1 The Test\n\tAuthor: Sylvain Neuvel\n\tPublisher: n/a')
-
 
     
 if __name__ == "__main__":
