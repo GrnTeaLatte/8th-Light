@@ -2,18 +2,29 @@ This command line application takes in a request from the user for a book search
 
 The program makes API calls from Google Books, then parses the json responses to only include the title, author(s) and publisher of the volume.
 
+app.py is arranged in three classes - GoogleInterface, Library and ReadingList. GoogleInterface is responsible for the API call. Library handles the operations of the user interface, so that the user can move back and forth between options as well as initiating the option to write to the reading list. ReadingList performs the actual writing of the list as well as viewing the list.
+
 This program is written in python.
 
 To get started, first download a recent installation of the Python interpreter(https://www.python.org/downloads/).
 
 Install requests (REST API framework)
+
 ```
 $ pip install -U requests
 ```
 
 Run the program from a terminal:
+
 ```
 $ python3 app.py
+```
+
+Run the tests from terminal:
+Comment out run_program on line 118 in app.py
+
+```
+$ python3 test.py
 ```
 
 Problem Description

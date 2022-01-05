@@ -8,6 +8,7 @@ class GoogleInterface():
     GOOGLE_QUERY_URL = 'https://www.googleapis.com/books/v1/volumes?q='
 
     def get_google_books(query):
+        # parameters based off of 'https://developers.google.com/books/docs/v1/using#query-params'
         parameters = {
             "maxResults" : 5,
             "printType" : "books"
@@ -71,13 +72,14 @@ class Library():
 
 class ReadingList():
     def write(book, book_number):
-        with open("sample.json", "r+") as file: # writing and appending to json file
+        with open("sample.json", "r+") as file: 
             file_data = json.load(file)
-            if any(saved_book['id'] == book['id'] for saved_book in file_data["reading_list"]): # if book already exists on List, do not add
+            if any(saved_book['id'] == book['id'] for saved_book in file_data["reading_list"]): 
                 print(f"Book {book_number} is already on the Reading List")
             else:
-                file_data["reading_list"].append(book)     
-                file.seek(0)
+                file_data["reading_list"].append(book)   
+                # return to top of file to replace contents  
+                file.seek(0)       
                 json.dump(file_data, file, indent = 4)
 
                 print(f"Book {book_number} saved to Reading List\n")
@@ -90,25 +92,22 @@ class ReadingList():
             else:
                 Library.print_books(file_data['reading_list'])  
 
-# sanitize query in case user enters harmful characters
 def sanitize_query(query):
     sanitized_query = urllib.parse.quote(query.strip()) 
     return sanitized_query
 
-#handle empty inputs
 def is_valid_query(query):
     return len(query) > 0 
 
 def run_program():
-    # User search google books
     user_input = input(f"Find Books by Title or type '{EXIT_ACTION}' to Exit: ") 
     while user_input != EXIT_ACTION: 
         query = sanitize_query(user_input) 
         if is_valid_query(query):
             results = GoogleInterface.get_google_books(query)   
-            if results['totalItems'] != 0:      # if the search returns valid results, display first 5 results 
+            if results['totalItems'] != 0:       
                 Library.print_books(results['items'])
-                Library.select_option(results)          # allow user to add to Reading List, perform another search, or view list
+                Library.select_option(results)          
             else:
                 print('No results found, please try again.')    
         else:
